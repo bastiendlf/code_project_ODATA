@@ -12,6 +12,12 @@ class GalleryProbesGenerator:
         self.path_to_images = path_to_dataset + '/images'
 
         self.probes_length = probes_length
+
+    def generate_npy_files(self):
+        """
+
+        :return:
+        """
         self._generate_dataset_all_elements()
         self._generate_gallery_probes()
 
@@ -168,6 +174,7 @@ class GalleryProbesGenerator:
         :return:
         """
         probe_unregistered_names = np.load(self.path_dataset_npy + '/probe_unregistered_names.npy', allow_pickle=True)
-        probe_unregistered_pictures = np.load(self.path_dataset_npy + '/probe_unregistered_pictures.npy', allow_pickle=True)
+        probe_unregistered_pictures = np.load(self.path_dataset_npy + '/probe_unregistered_pictures.npy',
+                                              allow_pickle=True)
 
         return probe_unregistered_names, probe_unregistered_pictures
