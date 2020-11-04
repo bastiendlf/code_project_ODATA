@@ -178,3 +178,41 @@ class GalleryProbesGenerator:
                                               allow_pickle=True)
 
         return probe_unregistered_names, probe_unregistered_pictures
+
+    def generate_probes_total(self):
+        """
+
+        :return:
+        """
+        probe_registered_names, probe_registered_pictures = self.get_registered_probes()
+        probe_unregistered_names, probe_unregistered_pictures = self.get_unregistered_probes()
+
+        probe_names = np.concatenate((probe_registered_names, probe_unregistered_names))
+        probe_pictures = np.concatenate((probe_registered_pictures, probe_unregistered_pictures))
+
+        if np.array_equal(probe_names[0:100], probe_registered_names) and np.array_equal(probe_names[100:200],
+                                                                                         probe_unregistered_names):
+            print('Le fichier probe_names a été crée correctement')
+
+        if np.array_equal(probe_pictures[0:100], probe_registered_pictures) and np.array_equal(probe_pictures[100:200],
+                                                                                        probe_unregistered_pictures):
+            print('Le fichier probe_pictures a été crée correctement')
+
+
+        #np.save(self.path_dataset_npy + '/probe_names.npy', probe_names)
+        #np.save(self.path_dataset_npy + '/probe_pictures.npy', probe_pictures)
+
+        return probe_names,probe_pictures
+
+    def get_probes_total(self):
+        probe_total_names = np.load(self.path_dataset_npy + '/probe_names.npy', allow_pickle=True)
+        probe_total_pictures = np.load(self.path_dataset_npy + '/probe_pictures.npy', allow_pickle=True)
+
+        return probe_total_names, probe_total_pictures
+
+    def get_groundtruth(selfself):
+        gt = list()
+        for i in range(200):
+            gt.append(True if i < 100 else False)
+
+        return np.array(gt)
