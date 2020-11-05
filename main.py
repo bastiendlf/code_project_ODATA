@@ -21,8 +21,8 @@ eigenfacegenerator = EigenfaceGenerator(data_generator=data_generator, component
 # eigen_faces, mean_face = eigenfacegenerator.get_eigenfaces()
 #
 
-person = 150
-picture = 10
+person = 170
+picture = 15
 
 pic = gallery_pictures[person][picture]
 personn_pic = plt.imshow(pic, cmap="gray")

@@ -14,7 +14,7 @@ class GalleryProbesGenerator:
 
     def generate_npy_files(self):
         """
-        Generates all the needed datasets in "npy" folder (all datasets are numpy Arrays.
+        Generates all the needed datasets in "npy" folder (all datasets are numpy Arrays).
         """
         self._generate_dataset_all_elements()
         self._generate_gallery_probes()
@@ -89,25 +89,35 @@ class GalleryProbesGenerator:
         gallery_names = np.load(self.path_dataset_npy + "/dataset_all_names.npy", allow_pickle=True)
         gallery_pictures = np.load(self.path_dataset_npy + "/dataset_all_pictures.npy", allow_pickle=True)
 
-        # copy for tests after splitting data
-        dataset_all_names = np.load("data/dataset1/npy/dataset_all_names.npy", allow_pickle=True)
-        dataset_all_pictures = np.load("data/dataset1/npy/dataset_all_pictures.npy", allow_pickle=True)
+        # Creating probes for unregistered people
+        probe_id_unregistered = sample(range(0, gallery_names.shape[0] - 1), int(self.probes_length / 2))
+        probe_unregistered_names = list()
+        probe_unregistered_pictures = list()
 
-        probe_id_global = sample(range(0, gallery_names.shape[0] - 1), self.probes_length)
-        probe_id_registered = probe_id_global[:int(self.probes_length / 2)]
-        probe_id_unregistered = probe_id_global[int(self.probes_length / 2):]
+        for probe_id in probe_id_unregistered:
+            probe_unregistered_names.append(gallery_names[probe_id])
+            # choosing a random picture in the array of pictures
+            picture_id = sample(range(0, len(gallery_pictures[probe_id]) - 1), 1)[0]
+
+            probe_unregistered_pictures.append(gallery_pictures[probe_id][picture_id])
+
+        # converting python lists into numpy arrays
+        probe_unregistered_names = np.array(probe_unregistered_names)
+        probe_unregistered_pictures = np.array(probe_unregistered_pictures)
+
+        # removing the unregistered people and all their pictures
+        gallery_names = np.delete(gallery_names, probe_id_unregistered)
+        gallery_pictures = np.delete(gallery_pictures, probe_id_unregistered)
 
         # Creating probes for registered people
+        probe_id_registered = sample(range(0, gallery_names.shape[0] - 1), int(self.probes_length / 2))
         probe_registered_names = list()
         probe_registered_pictures = list()
-        # next list will be useful later to check if probe_register_pictures correctly created
-        pictures_to_delete_from_gallery = list()
 
         for probe_id in probe_id_registered:
             probe_registered_names.append(gallery_names[probe_id])
             # choosing a random picture in the array of pictures
             picture_id = sample(range(0, len(gallery_pictures[probe_id]) - 1), 1)[0]
-            pictures_to_delete_from_gallery.append((probe_id, picture_id))
 
             probe_registered_pictures.append(gallery_pictures[probe_id][picture_id])
             gallery_pictures[probe_id] = np.delete(gallery_pictures[probe_id], [picture_id], axis=0)
@@ -116,55 +126,18 @@ class GalleryProbesGenerator:
         probe_registered_names = np.array(probe_registered_names)
         probe_registered_pictures = np.array(probe_registered_pictures)
 
-        # test to see if probe_register names and pictures well created
-        for i, (current_id, picture_id) in enumerate(pictures_to_delete_from_gallery):
+        # generating ground truth : elements of list with format ->(Boolean, Id_in_gallery)
+        # If the boolean is False, the ID is None
+        ground_truth_registered = list()
+        for id_probe_in_gallery in probe_id_registered:
+            ground_truth_registered.append((True, id_probe_in_gallery))
 
-            # check if one picture is correctly deleted for the current person in the gallery
-            if len(gallery_pictures[current_id]) + 1 != len(dataset_all_pictures[current_id]):
-                print(f"{gallery_names[current_id]} -> wrong pictures number after putting in probe registered")
+        ground_truth_unregistered = list()
+        for _ in probe_id_unregistered:
+            ground_truth_unregistered.append((False, None))
 
-            # check if the right picture is placed in probe_registered_pictures
-            if not (np.array_equal(probe_registered_pictures[i], dataset_all_pictures[current_id][picture_id])):
-                print(f'{probe_registered_names[i]} -> wrong picture copied')
-
-            # check if the picture placed in probe_registered_pictures is the one deleted
-            if np.array_equal(gallery_pictures[current_id][picture_id], dataset_all_pictures[current_id][picture_id]):
-                print(f"{probe_registered_names[i]} -> wrong picture deleted in gallery")
-
-        # Creating probes for unregistered people
-        probe_unregistered_names = list()
-        probe_unregistered_pictures = list()
-        # next list will be useful later to check if probe_register_pictures correctly created
-        people_to_delete_from_gallery = list()
-
-        for probe_id in probe_id_unregistered:
-            probe_unregistered_names.append(gallery_names[probe_id])
-            # choosing a random picture in the array of pictures
-            picture_id = sample(range(0, len(gallery_pictures[probe_id]) - 1), 1)[0]
-            people_to_delete_from_gallery.append((probe_id, gallery_names[probe_id]))
-
-            probe_unregistered_pictures.append(gallery_pictures[probe_id][picture_id])
-
-        # converting python lists into numpy arrays
-        probe_unregistered_names = np.array(probe_unregistered_names)
-        probe_unregistered_pictures = np.array(probe_unregistered_pictures)
-
-        # removing the unregistered elements and their pictures
-        gallery_names = np.delete(gallery_names, probe_id_unregistered)
-        gallery_pictures = np.delete(gallery_pictures, probe_id_unregistered)
-
-        # test to see if probe_unregister names and pictures well created
-        for i, (current_id, current_name) in enumerate(people_to_delete_from_gallery):
-
-            # check if all the names are removed
-            if current_name in gallery_names:
-                print(f'{current_name} not deleted from gallery')
-            # check if all probes correctly added
-            if current_name not in probe_unregistered_names:
-                print(f'{current_name} not in probes unregister')
-
-            if gallery_pictures.shape[0] != dataset_all_pictures.shape[0] - self.probes_length / 2:
-                print(f'Not the correct number of element in pictures gallery')
+        # First half corresponds to the registered probes, second half corresponds to the unregistered probes
+        ground_truth_merged = np.concatenate((ground_truth_registered, ground_truth_unregistered))
 
         #  remove the previous generated gallery datasets
         if os.path.exists(self.path_dataset_npy + "/gallery_pictures.npy"):
@@ -184,6 +157,10 @@ class GalleryProbesGenerator:
         if os.path.exists(self.path_dataset_npy + "/probe_unregistered_names.npy"):
             os.remove(self.path_dataset_npy + "/probe_unregistered_names.npy")
 
+        #  remove the previous generated ground_truth_merged
+        if os.path.exists(self.path_dataset_npy + "/ground_truth_merged.npy"):
+            os.remove(self.path_dataset_npy + "/ground_truth_merged.npy")
+
         # saving probes and gallery offline
         # gallery
         np.save(self.path_dataset_npy + '/gallery_names.npy', gallery_names)
@@ -196,6 +173,9 @@ class GalleryProbesGenerator:
         # unregistered probes
         np.save(self.path_dataset_npy + '/probe_unregistered_names.npy', probe_unregistered_names)
         np.save(self.path_dataset_npy + '/probe_unregistered_pictures.npy', probe_unregistered_pictures)
+
+        # ground truth
+        np.save(self.path_dataset_npy + '/ground_truth_merged.npy', ground_truth_merged)
 
     def get_gallery(self):
         """
@@ -296,10 +276,16 @@ class GalleryProbesGenerator:
 
     def get_ground_truth(self):
         """
-        Creates an array containing the truth of the registration (person in the gallery or not) of each probe
-        :return: Numpy array of Boolean
+        Loading ground truth : numpy array -> elements of array with format (Boolean, Id_in_gallery)
+        Note : If the boolean is False, the ID is None
+        First half corresponds to the registered probes, second half corresponds to the unregistered probes
+        :return: numpy array as long as the probes_merged array
         """
-        gt = list()
-        for i in range(self.probes_length):
-            gt.append(True if i < self.probes_length else False)
-        return np.array(gt)
+
+        if not (os.path.exists(self.path_dataset_npy + "/ground_truth_merged.npy")):
+            raise Exception(
+                "ground_truth_merged.npy does not exist, please call _generate_gallery_probes() first.")
+
+        ground_truth_merged = np.load(self.path_dataset_npy + '/ground_truth_merged.npy', allow_pickle=True)
+
+        return ground_truth_merged
