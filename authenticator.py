@@ -55,7 +55,7 @@ class Authenticator:
         results_tests_probes = list()
         for probe_image in probes_images:
             results_tests_probes.append(self.authenticate(probe_image, gallery_images, radius))
-        return np.array(results_tests_probes)
+        return np.array(results_tests_probes, dtype=object)
 
     def compute_metrics(self, result_probes_authentication):
         """
