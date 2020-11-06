@@ -1,17 +1,29 @@
 from gallery_probes_generator import GalleryProbesGenerator
 from eigenface_generator import EigenfaceGenerator
 import numpy as np
+from radius_search import radius_search_bruteforce, radius_opti, radius_opti_eigen
 
 
 class Authenticator:
-    def __init__(self, data_generator: GalleryProbesGenerator, eigen_face_generator: EigenfaceGenerator):
+    def __init__(self, data_generator: GalleryProbesGenerator, eigen_face_generator: EigenfaceGenerator,
+                 generate_new_npy_files=False):
+
+        if generate_new_npy_files:
+            data_generator.generate_npy_files()
+            eigen_face_generator.generate_npy_files()
+
         self.gallery_names, self.gallery_pictures = data_generator.get_gallery()
         self.probe_names, self.probe_pictures = data_generator.get_merged_probes()
         self.ground_truth = data_generator.get_ground_truth()
 
-        self.radius = 1970000
+        self.gallery_eigenface_pictures = eigen_face_generator.get_gallery_picture_eigenface()
+        self.probes_eigenface_pictures = eigen_face_generator.get_probes_pictures_eigenface()
+        self.eigen_faces, self.mean_face = eigen_face_generator.get_eigenfaces()
 
-    def authenticate(self, probe_image, gallery_images):
+        self.radius_optimal = radius_opti(self.gallery_pictures)
+        self.radius_optimal_eigenfaces = radius_opti_eigen(self.gallery_eigenface_pictures)
+
+    def authenticate(self, probe_image, gallery_images, radius):
         """
         Accepts or denies access to a probe image.
         :param probe_image: unknown image in gallery (could be eigenface coefficients)
@@ -20,7 +32,7 @@ class Authenticator:
         If the access is Accepted -> (True, [id_person#1, id_person#2, ...]
         If the access is Denied -> (False, None)
         """
-        search_among_gallery = radius_search_bruteforce(data=gallery_images, q=probe_image, radius=self.radius)
+        search_among_gallery = radius_search_bruteforce(data=gallery_images, q=probe_image, radius=radius)
         result = (False, None)
         if len(search_among_gallery) > 0:  # At least one neighbor found -> authentication accepted
             id_neighbors_found = list()
@@ -30,7 +42,7 @@ class Authenticator:
             result = (True, np.array(id_neighbors_found))
         return result
 
-    def authenticate_all_probes(self, gallery_images, probes_images):
+    def authenticate_all_probes(self, gallery_images, probes_images, radius):
         """
         Accepts or denies access to a set of probes images.
         :param probes_images: set of unknown images in gallery (could be eigenface coefficients)
@@ -42,7 +54,7 @@ class Authenticator:
         """
         results_tests_probes = list()
         for probe_image in probes_images:
-            results_tests_probes.append(self.authenticate(probe_image, gallery_images))
+            results_tests_probes.append(self.authenticate(probe_image, gallery_images, radius))
         return np.array(results_tests_probes)
 
     def compute_metrics(self, result_probes_authentication):
@@ -64,20 +76,25 @@ class Authenticator:
 
         for i, probe_authentication in enumerate(result_probes_authentication):
             # True positive : access authorized for a registered person
-            if probe_authentication[0] and self.ground_truth[i][0] in probe_authentication[1]:
+            if probe_authentication[0] and self.ground_truth[i][1] in probe_authentication[1]:
                 TP += 1
 
             # False positive : access authorized for an unregistered person
-            if probe_authentication[0] and self.ground_truth[i][0] not in probe_authentication[1]:
+            if probe_authentication[0] and self.ground_truth[i][1] not in probe_authentication[1]:
                 FP += 1
 
             # True negative : access denied for an unregistered person
-            if not(probe_authentication[0]) and not(self.ground_truth[i][0]):
+            if not (probe_authentication[0]) and not (self.ground_truth[i][0]):
                 TN += 1
 
             # False negative : access denied for a registered person
-            if not(probe_authentication[0]) and self.ground_truth[i][0]:
+            if not (probe_authentication[0]) and self.ground_truth[i][0]:
                 FN += 1
+
+        print('TP: ' + str(TP))
+        print('FP: ' + str(FP))
+        print('TN: ' + str(TN))
+        print('FN: ' + str(FN))
 
         accuracy = (TP + TN) / (TP + TN + FP + FN)
         precision = TP / (TP + FP)
