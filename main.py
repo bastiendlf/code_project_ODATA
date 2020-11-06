@@ -25,7 +25,7 @@ person = 170
 picture = 15
 
 pic = gallery_pictures[person][picture]
-personn_pic = plt.imshow(pic, cmap="gray")
+person_pic = plt.imshow(pic, cmap="gray")
 plt.show()
 
 coefs_pic = eigenfacegenerator.get_coefs_from_picture(pic)
