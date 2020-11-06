@@ -258,7 +258,7 @@ class GalleryProbesGenerator:
         """
         Get numpy arrays of all probes for unregistered and unregistered people
         :return: probe_merged_names -> array of people's name (str)
-        probe_merged_pictures -> array of pictures (pictures not in gallery)
+        probe_merged_pictures -> array of pictures
         """
 
         if not (os.path.exists(self.path_dataset_npy + "/probe_merged_names.npy")):
