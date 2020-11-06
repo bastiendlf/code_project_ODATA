@@ -58,4 +58,4 @@ def radius_opti_eigen(data):
         mean_person_list.append(np.mean(mean_row_list))
     mean_total = np.mean(mean_person_list)
     std_total = sqrt(np.var(mean_person_list))  # ecart type
-    return 10 * mean_total  # radius opti
+    return  mean_total + 9 * std_total  # radius opti
