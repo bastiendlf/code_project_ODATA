@@ -23,7 +23,8 @@ def compute_distance_1d(data, query, norm="L2"):
     :return: (d)-sized Numpy array of all the distances between elements in data and the query
     """
     norm_function = norms[norm]
-    distances = np.zeros(shape=len(data), dtype=np.float32)
+    distances = np.zeros(shape=len(data), dtype=np.float_)
+    # distances = np.zeros(shape=len(data))
     for i, d in enumerate(data):
         distances[i] = norm_function(d - query)
     return distances
@@ -33,14 +34,14 @@ def compute_distance_2d(data, q, norm='L2'):
     """Compute distances in 2D.
     Computes the distance between a dataset in 2D (array of array) and a query
     :param data: (n,d)-sized Numpy array (2 dimensions). (n) lines and (d) columns
-	:param query: Query vector
+    :param q: Query vector
 	:param norm: indicate the type of distance chosen. L1, L2, inf
 	:type data: Numpy array in 2 dimensions
-	:type query: (m)-sized Numpy array of floats
-    :return: (n,d)-sized Numpy array of all the distances between elements in a row of dataset
+	:type q: (m)-sized Numpy array of floats
+	:return: (n,d)-sized Numpy array of all the distances between elements in a row of dataset
     and the query for each rows in dataset
     """
-    total_array_q = np.zeros(dtype=object, shape=273)
+    total_array_q = np.zeros(dtype=object, shape=data.shape[0])
     for i, person in enumerate(data):
         distances = compute_distance_1d(person, q, norm)
         total_array_q[i] = distances
@@ -73,6 +74,11 @@ def radius_opti(data):
     :param data: (n,d)-sized Numpy array (2 dimensions). (n) lines and (d) columns
     :return: the optimal radius to do a radius search on dataset with pictures (150,150)
     """
+    def remove_nan(array):
+        nan_array = np.isnan(array)
+        not_nan_array = ~ nan_array
+        return array[not_nan_array]
+        
     mean_total_list = []
     for i, row in enumerate(data):
         mean_row_list = []
@@ -80,13 +86,15 @@ def radius_opti(data):
             tmp = row
             if element.shape == (150, 150):
                 mean_row_list.append(np.mean(compute_distance_1d(np.delete(tmp, j, axis=0), element)))
+        mean_row_list = remove_nan(np.array(mean_row_list))
         mean_row = np.mean(mean_row_list)
         mean_total_list.append(mean_row)
+
+    mean_total_list = remove_nan(np.array(mean_total_list))
     mean_total = np.mean(mean_total_list)  # moyenne de distance entre deux photos d'une meme pers
     std_total = sqrt(np.var(mean_total_list))  # ecart type
-    print(mean_total)
-    print(std_total)
     return mean_total + std_total  # radius opti
+
 
 
 def radius_opti_eigen(data):
@@ -104,6 +112,4 @@ def radius_opti_eigen(data):
         mean_person_list.append(np.mean(mean_row_list))
     mean_total = np.mean(mean_person_list)
     std_total = sqrt(np.var(mean_person_list))  # ecart type
-    print(mean_total)
-    print(std_total)
     return mean_total + 9 * std_total  # radius opti

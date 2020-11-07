@@ -8,8 +8,8 @@ class GalleryProbesGenerator:
 
     def __init__(self, path_to_dataset='data/dataset1/', probes_length=200):
         self.path_to_dataset = path_to_dataset
-        self.path_dataset_npy = path_to_dataset + '/npy'
-        self.path_to_images = path_to_dataset + '/images'
+        self.path_dataset_npy = path_to_dataset + 'npy/'
+        self.path_to_images = path_to_dataset + 'images/'
         self.probes_length = probes_length
 
     def generate_npy_files(self):
@@ -43,7 +43,7 @@ class GalleryProbesGenerator:
             if current_name not in all_pictures_by_person:
                 all_pictures_by_person[current_name] = list()
 
-            all_pictures_by_person[current_name].append(mpimg.imread(f'data/dataset1/images/{picture}'))
+            all_pictures_by_person[current_name].append(mpimg.imread(self.path_to_images + picture))
 
         for key, value in all_pictures_by_person.items():
             # converting python lists of pictures into numpy arrays of pictures
@@ -120,7 +120,8 @@ class GalleryProbesGenerator:
             picture_id = sample(range(0, len(gallery_pictures[probe_id]) - 1), 1)[0]
 
             probe_registered_pictures.append(gallery_pictures[probe_id][picture_id])
-            gallery_pictures[probe_id] = np.delete(gallery_pictures[probe_id], [picture_id], axis=0)
+            if len(gallery_pictures[probe_id]) > 1:
+                gallery_pictures[probe_id] = np.delete(gallery_pictures[probe_id], [picture_id], axis=0)
 
         # converting python lists into numpy arrays
         probe_registered_names = np.array(probe_registered_names)

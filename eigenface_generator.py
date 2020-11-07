@@ -121,7 +121,7 @@ class EigenfaceGenerator:
         transpose_eigen_faces = np.transpose(eigen_faces)
 
         gallery_eigenface_pictures = list()
-        print("Computing new gallery with eignface...")
+        print("Computing new gallery with eigenface...")
         for person in self.gallery_pictures:
             list_of_pictures_coefs = list()
 

@@ -5,12 +5,7 @@ from radius_search import radius_search_bruteforce, radius_opti, radius_opti_eig
 
 
 class Authenticator:
-    def __init__(self, data_generator: GalleryProbesGenerator, eigen_face_generator: EigenfaceGenerator,
-                 generate_new_npy_files=False):
-
-        if generate_new_npy_files:
-            data_generator.generate_npy_files()
-            eigen_face_generator.generate_npy_files()
+    def __init__(self, data_generator: GalleryProbesGenerator, eigen_face_generator: EigenfaceGenerator):
 
         self.gallery_names, self.gallery_pictures = data_generator.get_gallery()
         self.probe_names, self.probe_pictures = data_generator.get_merged_probes()
