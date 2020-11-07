@@ -3,7 +3,7 @@ from eigenface_generator import EigenfaceGenerator
 import matplotlib.pyplot as plt
 import numpy as np
 
-data_generator = GalleryProbesGenerator(path_to_dataset='data/dataset1/', probes_length=200)
+data_generator = GalleryProbesGenerator(path_to_dataset='../data/dataset1/', probes_length=200)
 
 # data_generator.generate_npy_files()
 

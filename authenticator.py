@@ -49,7 +49,7 @@ class Authenticator:
         :param gallery_images: gallery of registered people pictures (could be eigenface coefficients)
         :return: List of tuples, index corresponding to the probes order
         Tuple -> (Boolean, list(IDS_of_people_in_gallery_similar_enough)
-        If the access is Accepted -> (True, [id_person#1, id_person#2, ...]
+        If the access is Accepted -> (True, [id_person#1, id_person#2, ...])
         If the access is Denied -> (False, None)
         """
         results_tests_probes = list()
