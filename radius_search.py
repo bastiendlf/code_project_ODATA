@@ -102,13 +102,14 @@ def radius_opti_eigen(data):
     :param data: (n,d)-sized Numpy array (2 dimensions). (n) lines and (d) columns
     :return: the optimal radius to do a radius search on dataset with pictures of size(1,d)
     """
-    mean_person_list = []
-    for j, person in enumerate(data):
+    mean_total_list = []
+    for i, row in enumerate(data):
         mean_row_list = []
-        for i, row in enumerate(data[j]):
-            tmp = row
-            mean_row_list.append(np.mean(compute_distance_1d(np.delete(tmp, i), row[i])))
-        mean_person_list.append(np.mean(mean_row_list))
-    mean_total = np.mean(mean_person_list)
-    std_total = sqrt(np.var(mean_person_list))  # ecart type
+        if len(row) > 1:
+            for j, element in enumerate(row):
+                tmp = row
+                mean_row_list.append(np.mean(compute_distance_1d(np.delete(tmp, j), element)))
+            mean_total_list.append(np.mean(mean_row_list))
+    mean_total = np.mean(mean_total_list)
+    std_total = sqrt(np.var(mean_total_list))  # ecart type
     return mean_total + 9 * std_total  # radius opti
