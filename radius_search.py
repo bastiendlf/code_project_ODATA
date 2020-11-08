@@ -82,13 +82,13 @@ def radius_opti(data):
     mean_total_list = []
     for i, row in enumerate(data):
         mean_row_list = []
-        for j, element in enumerate(row):
-            tmp = row
-            mean_row_list.append(np.mean(compute_distance_1d(np.delete(tmp, j, axis=0), element)))
-        mean_row_list = remove_nan(np.array(mean_row_list))
-        mean_row = np.mean(mean_row_list)
-        mean_total_list.append(mean_row)
-
+        if len(row) > 1:
+            for j, element in enumerate(row):
+                tmp = row
+                mean_row_list.append(np.mean(compute_distance_1d(np.delete(tmp, j, axis=0), element)))
+            mean_row_list = remove_nan(np.array(mean_row_list))
+            mean_row = np.mean(mean_row_list)
+            mean_total_list.append(mean_row)
     mean_total_list = remove_nan(np.array(mean_total_list))
     mean_total = np.mean(mean_total_list)  # moyenne de distance entre deux photos d'une meme pers
     std_total = sqrt(np.var(mean_total_list))  # ecart type
