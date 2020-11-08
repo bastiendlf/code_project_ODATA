@@ -74,11 +74,12 @@ def radius_opti(data):
     :param data: (n,d)-sized Numpy array (2 dimensions). (n) lines and (d) columns
     :return: the optimal radius to do a radius search on dataset with pictures (150,150)
     """
+
     def remove_nan(array):
         nan_array = np.isnan(array)
         not_nan_array = ~ nan_array
         return array[not_nan_array]
-        
+
     mean_total_list = []
     for i, row in enumerate(data):
         mean_row_list = []
@@ -95,21 +96,19 @@ def radius_opti(data):
     return mean_total + std_total  # radius opti
 
 
-
 def radius_opti_eigen(data):
     """
     Optimal radius for dataset with pictures (1,d). (dataset with ACP reduction)
     :param data: (n,d)-sized Numpy array (2 dimensions). (n) lines and (d) columns
     :return: the optimal radius to do a radius search on dataset with pictures of size(1,d)
     """
-    mean_total_list = []
-    for i, row in enumerate(data):
+    mean_person_list = []
+    for j, person in enumerate(data):
         mean_row_list = []
-        if len(row) > 1:
-            for j, element in enumerate(row):
-                tmp = row
-                mean_row_list.append(np.mean(compute_distance_1d(np.delete(tmp, j), element)))
-            mean_total_list.append(np.mean(mean_row_list))
-    mean_total = np.mean(mean_total_list)
-    std_total = sqrt(np.var(mean_total_list))  # ecart type
+        for i, row in enumerate(data[j]):
+            tmp = row
+            mean_row_list.append(np.mean(compute_distance_1d(np.delete(tmp, i), row[i])))
+        mean_person_list.append(np.mean(mean_row_list))
+    mean_total = np.mean(mean_person_list)
+    std_total = sqrt(np.var(mean_person_list))  # ecart type
     return mean_total + 9 * std_total  # radius opti
