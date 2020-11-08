@@ -84,7 +84,7 @@ def radius_opti(data):
         mean_row_list = []
         for j, element in enumerate(row):
             tmp = row
-            mean_row_list.append(min(compute_distance_1d(np.delete(tmp, j, axis=0), element)))
+            mean_row_list.append(np.mean(compute_distance_1d(np.delete(tmp, j, axis=0), element)))
         mean_row_list = remove_nan(np.array(mean_row_list))
         mean_row = np.mean(mean_row_list)
         mean_total_list.append(mean_row)
