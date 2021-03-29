@@ -1,7 +1,7 @@
 ##Bastien DELFORGE
 ##Adrien MALGOWSKI 
 
-# PROJECT ODATA : Facial authentication
+# PROJECT ODATA : Facial authentication (without opencv)
 
 !!! PLEASE !!!
 place  dataset1 and dataset2 folder in a new folder called "data" 
